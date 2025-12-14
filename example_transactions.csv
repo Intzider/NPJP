@@ -1,0 +1,23 @@
+date,amount,category,type,description
+2024-01-05,2500.00,salary,income,Monthly salary payment
+2024-01-10,150.50,groceries,expense,Supermarket shopping
+2024-01-12,45.00,utilities,expense,Electric bill payment
+2024-01-15,1200.00,rent,expense,Monthly apartment rent
+2024-01-18,75.25,dining,expense,Restaurant meal
+2024-01-20,500.00,savings,transfer,Transfer to savings account
+2024-01-25,3000.00,freelance,income,Freelance project payment
+2024-02-01,200.00,entertainment,expense,Cinema and tickets
+2024-02-05,2500.00,salary,income,Monthly salary payment
+2024-02-08,120.75,groceries,expense,Supermarket shopping
+2024-02-10,85.50,transportation,expense,Fuel and car maintenance
+2024-02-15,1200.00,rent,expense,Monthly apartment rent
+2024-02-18,95.00,clothing,expense,Shopping for clothes
+2024-02-20,600.00,utilities,expense,Internet and phone bills
+2024-02-28,450.00,dining,expense,Restaurant and cafe visits
+2024-03-01,2500.00,salary,income,Monthly salary payment
+2024-03-05,175.30,groceries,expense,Supermarket shopping
+2024-03-10,130.00,entertainment,expense,Concert tickets
+2024-03-15,1200.00,rent,expense,Monthly apartment rent
+2024-03-18,2000.00,freelance,income,Freelance project completion
+2024-03-20,300.00,utilities,expense,Electricity and water
+2024-03-25,850.00,dining,expense,Multiple dining occasions
