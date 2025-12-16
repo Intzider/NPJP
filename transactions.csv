@@ -1,0 +1,11 @@
+date,amount,category,type,description
+2024-01-01,3000,Salary,income,January salary
+2024-01-03,150.75,Groceries,expense,Supermarket shopping
+2024-02-05,1200,Rent,expense,January rent payment
+2024-02-07,60,Utilities,expense,Electricity bill
+2024-04-10,200,Freelance,income,Website design project
+2024-05-12,45.50,Transport,expense,Gas refill
+2024-06-15,90,Entertainment,expense,Movie and dinner
+2024-09-20,500,Savings,transfer,Transfer to savings account
+2024-10-25,250,Bonus,income,Performance bonus
+2024-01-28,110,Internet,expense,Monthly internet bill
