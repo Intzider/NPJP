@@ -1,32 +1,33 @@
-import importer as imp
+from importer import validator, importer_controller as imp
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from database.database_controller import TransactionDatabase
 
 
-def load_transactions(csv_path: str) -> pd.DataFrame:
+def load_transactions_from_db() -> pd.DataFrame:
     """
-    Load transactions using TransactionImporter and return a DataFrame.
+    Load transactions from database and return a DataFrame.
     """
-    importer = imp.TransactionImporter()
-    importer.load(csv_path)
+    db = TransactionDatabase()
+    transactions = db.fetch_all()
 
-    transactions = importer.get_transactions()
+    if not transactions:
+        print("Warning: No transactions found in database.")
+        return pd.DataFrame()
 
-    # Convert to DataFrame
     df = pd.DataFrame(transactions)
 
-    # Convert datetime to date only
     df["date"] = pd.to_datetime(df["date"]).dt.date
 
     return df
+
 
 def ensure_time_columns(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df["date"] = pd.to_datetime(df["date"])
     df["month"] = df["date"].dt.to_period("M").astype(str)
     return df
-
 
 
 def plot_income_vs_expense(df: pd.DataFrame) -> None:
@@ -52,7 +53,7 @@ def plot_expenses_by_category(df: pd.DataFrame) -> None:
     """
     Bar chart: expenses grouped by category.
     """
-    expenses = df[df["type"] == imp.TransactionType.EXPENSE.value]
+    expenses = df[df["type"] == validator.TransactionType.EXPENSE.value]
 
     category_totals = (
         expenses.groupby("category")["amount"]
@@ -115,6 +116,7 @@ def plot_expense_distribution(df: pd.DataFrame) -> None:
     plt.tight_layout()
     plt.show()
 
+
 def plot_category_share_over_time(df: pd.DataFrame) -> None:
     expenses = df[df["type"] == imp.TransactionType.EXPENSE.value]
 
@@ -141,6 +143,7 @@ def plot_category_share_over_time(df: pd.DataFrame) -> None:
     plt.tight_layout()
     plt.show()
 
+
 def plot_expense_outliers(df: pd.DataFrame) -> None:
     expenses = df[df["type"] == imp.TransactionType.EXPENSE.value]
 
@@ -156,6 +159,7 @@ def plot_expense_outliers(df: pd.DataFrame) -> None:
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.show()
+
 
 def plot_expense_heatmap(df: pd.DataFrame) -> None:
     expenses = df[df["type"] == imp.TransactionType.EXPENSE.value]
@@ -179,6 +183,7 @@ def plot_expense_heatmap(df: pd.DataFrame) -> None:
     plt.ylabel("Month")
     plt.tight_layout()
     plt.show()
+
 
 def plot_cumulative_net_balance(df: pd.DataFrame) -> None:
     cashflow = df[df["type"] != imp.TransactionType.TRANSFER.value].copy()
@@ -205,27 +210,21 @@ def plot_cumulative_net_balance(df: pd.DataFrame) -> None:
 
 
 def plot_monthly_cashflow_rolling(df: pd.DataFrame) -> None:
-    # Filter out transfers
-    df_filtered = df[df["type"] != imp.TransactionType.TRANSFER.value].copy()
+    df_filtered = df[df["type"] != validator.TransactionType.TRANSFER.value].copy()
 
-    # Group by month and type
     df_grouped = (
         df_filtered.groupby([df_filtered["date"].dt.to_period("M"), "type"])["amount"]
         .sum()
         .reset_index()
     )
 
-    # Convert Period to string for plotting
     df_grouped["month"] = df_grouped["date"].astype(str)
 
-    # Pivot for plotting
     pivot = df_grouped.pivot(index="month", columns="type", values="amount").fillna(0)
     pivot = pivot.astype(float)
 
-    # Rolling 3-month average
     rolling = pivot.rolling(3, min_periods=1).mean()
 
-    # Plot actual vs rolling average
     plt.figure(figsize=(12, 6))
     sns.lineplot(data=pivot, markers=True, dashes=False)
     sns.lineplot(data=rolling, linestyle="--")
@@ -237,10 +236,10 @@ def plot_monthly_cashflow_rolling(df: pd.DataFrame) -> None:
     plt.tight_layout()
     plt.show()
 
+
 def plot_category_correlation(df: pd.DataFrame) -> None:
     expenses = df[df["type"] == imp.TransactionType.EXPENSE.value].copy()
 
-    # Group by month and category
     pivot = (
         expenses.groupby([expenses["date"].dt.to_period("M"), "category"])["amount"]
         .sum()
@@ -248,10 +247,8 @@ def plot_category_correlation(df: pd.DataFrame) -> None:
         .astype(float)
     )
 
-    # Compute correlation between categories
     corr = pivot.corr()
 
-    # Plot heatmap
     plt.figure(figsize=(10, 8))
     sns.heatmap(
         corr,
@@ -266,18 +263,51 @@ def plot_category_correlation(df: pd.DataFrame) -> None:
     plt.show()
 
 
-csv_path = "transactions.csv"
+def main():
+    df = load_transactions_from_db()
 
-df = load_transactions(csv_path)
-df = ensure_time_columns(df)
+    if df.empty:
+        print("No data available. Please load transactions into the database first.")
+        return
 
-plot_income_vs_expense(df)
-plot_expenses_by_category(df)
-plot_daily_cashflow(df)
-plot_expense_distribution(df)
-plot_expense_outliers(df)
-plot_category_share_over_time(df)
-plot_cumulative_net_balance(df)
-plot_expense_heatmap(df)
-plot_monthly_cashflow_rolling(df)
-plot_category_correlation(df)
+    df = ensure_time_columns(df)
+    while True:
+        print("\n===== TRANSACTION STATISTICS =====")
+        print("1) Income vs Expense")
+        print("2) Expenses by Category")
+        print("3) Daily Cash Flow")
+        print("4) Expense Distribution")
+        print("5) Expense Outliers")
+        print("6) Category Share Over Time")
+        print("7) Cumulative Net Balance")
+        print("8) Monthly Cash Flow with Rolling Average")
+        print("9) Category Correlation")
+        print("0) Expense Heatmap")
+        print("X) Back to main menu")
+
+        choice = input("> ").strip()
+
+        if choice == "0":
+            plot_expense_heatmap(df)
+        elif choice == "1":
+            plot_income_vs_expense(df)
+        elif choice == "2":
+            plot_expenses_by_category(df)
+        elif choice == "3":
+            plot_daily_cashflow(df)
+        elif choice == "4":
+            plot_expense_distribution(df)
+        elif choice == "5":
+            plot_expense_outliers(df)
+        elif choice == "6":
+            plot_category_share_over_time(df)
+        elif choice == "7":
+            plot_cumulative_net_balance(df)
+        elif choice == "8":
+            plot_monthly_cashflow_rolling(df)
+        elif choice == "9":
+            plot_category_correlation(df)
+        elif choice.lower() == "x":
+            break
+        else:
+            print("Invalid choice. Please try again.")
