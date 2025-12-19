@@ -117,33 +117,6 @@ def plot_expense_distribution(df: pd.DataFrame) -> None:
     plt.show()
 
 
-def plot_category_share_over_time(df: pd.DataFrame) -> None:
-    expenses = df[df["type"] == imp.TransactionType.EXPENSE.value]
-
-    monthly = (
-        expenses
-        .groupby(["month", "category"])["amount"]
-        .sum()
-        .reset_index()
-    )
-
-    pivot = monthly.pivot(
-        index="month",
-        columns="category",
-        values="amount",
-    ).fillna(0).astype(float)
-
-    pivot.plot(kind="area", stacked=True, figsize=(10, 6))
-
-    plt.title("Expense Category Share Over Time")
-    plt.xlabel("Month")
-    plt.ylabel("Amount")
-    plt.xticks(rotation=45)
-    plt.legend(title="Category", bbox_to_anchor=(1.05, 1))
-    plt.tight_layout()
-    plt.show()
-
-
 def plot_expense_outliers(df: pd.DataFrame) -> None:
     expenses = df[df["type"] == imp.TransactionType.EXPENSE.value]
 
@@ -209,60 +182,6 @@ def plot_cumulative_net_balance(df: pd.DataFrame) -> None:
     plt.show()
 
 
-def plot_monthly_cashflow_rolling(df: pd.DataFrame) -> None:
-    df_filtered = df[df["type"] != validator.TransactionType.TRANSFER.value].copy()
-
-    df_grouped = (
-        df_filtered.groupby([df_filtered["date"].dt.to_period("M"), "type"])["amount"]
-        .sum()
-        .reset_index()
-    )
-
-    df_grouped["month"] = df_grouped["date"].astype(str)
-
-    pivot = df_grouped.pivot(index="month", columns="type", values="amount").fillna(0)
-    pivot = pivot.astype(float)
-
-    rolling = pivot.rolling(3, min_periods=1).mean()
-
-    plt.figure(figsize=(12, 6))
-    sns.lineplot(data=pivot, markers=True, dashes=False)
-    sns.lineplot(data=rolling, linestyle="--")
-    plt.title("Monthly Income and Expenses with 3-Month Rolling Average")
-    plt.xlabel("Month")
-    plt.ylabel("Amount")
-    plt.xticks(rotation=45)
-    plt.legend(title="Type / Rolling")
-    plt.tight_layout()
-    plt.show()
-
-
-def plot_category_correlation(df: pd.DataFrame) -> None:
-    expenses = df[df["type"] == imp.TransactionType.EXPENSE.value].copy()
-
-    pivot = (
-        expenses.groupby([expenses["date"].dt.to_period("M"), "category"])["amount"]
-        .sum()
-        .unstack(fill_value=0)
-        .astype(float)
-    )
-
-    corr = pivot.corr()
-
-    plt.figure(figsize=(10, 8))
-    sns.heatmap(
-        corr,
-        annot=True,
-        fmt=".2f",
-        cmap="coolwarm",
-        center=0,
-        linewidths=0.5,
-    )
-    plt.title("Correlation Between Expense Categories")
-    plt.tight_layout()
-    plt.show()
-
-
 def main():
     df = load_transactions_from_db()
 
@@ -278,18 +197,13 @@ def main():
         print("3) Daily Cash Flow")
         print("4) Expense Distribution")
         print("5) Expense Outliers")
-        print("6) Category Share Over Time")
-        print("7) Cumulative Net Balance")
-        print("8) Monthly Cash Flow with Rolling Average")
-        print("9) Category Correlation")
-        print("0) Expense Heatmap")
+        print("6) Cumulative Net Balance")
+        print("7) Expense Heatmap")
         print("X) Back to main menu")
 
         choice = input("> ").strip()
 
-        if choice == "0":
-            plot_expense_heatmap(df)
-        elif choice == "1":
+        if choice == "1":
             plot_income_vs_expense(df)
         elif choice == "2":
             plot_expenses_by_category(df)
@@ -300,13 +214,9 @@ def main():
         elif choice == "5":
             plot_expense_outliers(df)
         elif choice == "6":
-            plot_category_share_over_time(df)
-        elif choice == "7":
             plot_cumulative_net_balance(df)
-        elif choice == "8":
-            plot_monthly_cashflow_rolling(df)
-        elif choice == "9":
-            plot_category_correlation(df)
+        elif choice == "7":
+            plot_expense_heatmap(df)
         elif choice.lower() == "x":
             break
         else:

@@ -1,32 +1,9 @@
 from importer import validator, importer_controller as imp
 from importer.validator import ValidationError, validate_amount
 from .database_controller import TransactionDatabase
-from decimal import Decimal
 from datetime import datetime
 
 
-# ASCII visualization helpers
-def ascii_bar(label: str, value: Decimal, scale: Decimal = Decimal("10")):
-    bars = int(value / scale) if value > 0 else 0
-    print(f"{label:15} {'█' * bars} {value}")
-
-
-def show_ascii_statistics(transactions):
-    income = sum(t["amount"] for t in transactions if t["type"] == validator.TransactionType.INCOME.value)
-    expense = sum(t["amount"] for t in transactions if t["type"] == validator.TransactionType.EXPENSE.value)
-    net = income - expense
-
-    print("\n--- STATISTICS ---")
-    print(f"Total income : {income}")
-    print(f"Total expense: {expense}")
-    print(f"Net balance  : {net}")
-
-    print("\n--- ASCII BAR CHART ---")
-    ascii_bar("Income", income)
-    ascii_bar("Expense", expense)
-
-
-# Printing helpers
 def print_transactions(transactions):
     print("\n--- TRANSACTIONS ---")
 
@@ -145,7 +122,6 @@ def database_menu():
             min_amt = read_decimal(input("Minimum amount: ").strip())
             max_amt = read_decimal(input("Maximum amount: ").strip())
 
-            print(min_amt, max_amt)
             if min_amt or max_amt:
                 transaction_filter.by_amount_range(min_amt, max_amt)
 
